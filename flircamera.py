@@ -324,8 +324,9 @@ class SharedBuffer(object):
             self.states = np.ndarray(n_states, dtype=int, buffer=self._shm_states.buf)
             self.states[:3] = shape
             self.states[3] = 0
+            # Fixed bug: "TypeError: CreateFileMapping() argument 4 must be int, not numpy.int64"
             self._shm_buffer = shared_memory.SharedMemory(name=f'{prefix}_buffer', 
-                create=True, size=np.prod(shape) * np.dtype('uint8').itemsize)
+                create=True, size=int(np.prod(shape)) * np.dtype('uint8').itemsize)
             self.buffer = np.ndarray(shape, dtype=np.uint8, buffer=self._shm_buffer.buf)
         else:
             self.master = False
@@ -334,7 +335,7 @@ class SharedBuffer(object):
             self.states = np.ndarray(n_states, dtype=int, buffer=self._shm_states.buf)
             shape = self.states[:3]
             self._shm_buffer = shared_memory.SharedMemory(name=f'{prefix}_buffer', 
-                create=False, size=np.prod(shape) * np.dtype('uint8').itemsize)
+                create=False, size=int(np.prod(shape)) * np.dtype('uint8').itemsize)
             self.buffer = np.ndarray(shape, dtype=np.uint8, buffer=self._shm_buffer.buf)
 
     def finalize(self):
