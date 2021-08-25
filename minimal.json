@@ -1,0 +1,5 @@
+{
+    "AcquisitionMode": "Continuous",
+    "AcquisitionFrameRateEnable": true,
+    "AcquisitionFrameRate": 200
+}

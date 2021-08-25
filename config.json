@@ -1,0 +1,10 @@
+{
+    "ExposureAuto": "Continuous",
+    "GainAuto": "Continuous",
+    "PixelFormat": "Mono8",
+    "BinningHorizontal": 4,
+    "BinningVertical": 4,
+    "AcquisitionMode": "Continuous",
+    "AcquisitionFrameRateEnable": true,
+    "AcquisitionFrameRate": 200
+}
