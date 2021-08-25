@@ -269,7 +269,7 @@ class VideoRecorder(object):
                     bitrate = 1000000
                 if bitrate < 1: # Compression rate, e.g., 1:50
                     bitrate = int(self.raw_bitrate * bitrate)
-                option.bitrate = bitrate
+                option.bitrate = int(bitrate) # The underlying C++ code requires `unsigned int`
             option.frameRate = self.frame_rate
             if path.splitext(self.fname)[1] in ['.avi', '.AVI']:
                 self.fname = self.fname[:-4] # spinnaker will always append .avi
