@@ -23,6 +23,8 @@ class NodeMap(object):
         value = PySpin.CValuePtr,
     )
     
+    # Please add new entries below as needed.
+    # Only registered entries in the following dict can be used.
     kinds = dict(
         AcquisitionFrameRate = 'float',
         AcquisitionFrameRateEnable = 'boolean',
@@ -93,8 +95,9 @@ class SingleCamera(object):
     '''
     Select, config and use a single camera in the system.
     '''
-    def __init__(self, idx=0, config=None, verbose=1):
+    def __init__(self, idx=0, config=None, share=True, verbose=1):
         self.system = PySpin.System.GetInstance()
+        self.share = share
         self.verbose = verbose
         if self.verbose > 0:
             version = self.system.GetLibraryVersion()
@@ -181,7 +184,8 @@ class SingleCamera(object):
         if self['GainAuto'] in ['Once', 'Continuous']:
             print(f"Auto ({self['GainAuto']}) Gain = {self['Gain']:g}")
         # Create shared memory
-        self.shared_buffer = SharedBuffer([10, height, width])
+        if self.share:
+            self.shared_buffer = SharedBuffer([10, height, width])
         # Create VideoRecorder()
         if record_kws is None:
             record_kws = dict()
@@ -195,7 +199,8 @@ class SingleCamera(object):
             raise RuntimeError(f"Image incomplete with image status {image.GetImageStatus()}")
         else:
             im = image.GetNDArray()
-            self.shared_buffer.latest = im
+            if self.share:
+                self.shared_buffer.latest = im
             self.recorder.add_frame(image)
             image.Release()
         self._frame_count += 1
@@ -205,7 +210,8 @@ class SingleCamera(object):
         duration = time.time() - self._start_time
         self.camera.EndAcquisition()
         self.recorder.finalize()
-        self.shared_buffer.finalize()
+        if self.share:
+            self.shared_buffer.finalize()
         if self.verbose:
             print(f"Acquired {self._frame_count} images")
             print(f"All data saved to '{path.realpath(self.recorder.fname)}'")
@@ -392,7 +398,7 @@ if __name__ == '__main__':
             fig.canvas.flush_events()
         shared_buffer.finalize()
     else: # Acquire images
-        camera = SingleCamera(config=args.config)
+        camera = SingleCamera(config=args.config, share=True)
         camera.begin_acquisition(args.output, record_kws=dict(bitrate=1e6))
         for k in range(args.n_frames):
             im = camera.get_frame()
